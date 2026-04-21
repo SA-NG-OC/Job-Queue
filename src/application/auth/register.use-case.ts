@@ -1,8 +1,8 @@
-import { Result, ok, err } from '../../../domain/shared/result';
-import { UserRepository } from '../../../domain/auth/repositories/user.repository';
-import { buildNewUser } from '../../../domain/auth/services/auth.domain.service';
-import { userToJSON } from '../../../domain/auth/entities/user.entity';
-import { signAccessToken, signRefreshToken } from '../../../infrastructure/http/utils/jwt';
+import { Result, ok, err } from '../../domain/shared/result';
+import { UserRepository } from '../../domain/auth/repositories/user.repository';
+import { buildNewUser } from '../../domain/auth/services/auth.domain.service';
+import { userToJSON } from '../../domain/auth/entities/user.entity';
+import { signAccessToken, signRefreshToken } from '../../infrastructure/http/utils/jwt';
 
 export type RegisterCommand = { email: string; password: string };
 

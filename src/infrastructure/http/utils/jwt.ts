@@ -1,17 +1,12 @@
 import jwt from 'jsonwebtoken';
+import { JWTPayload } from '../types';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'access_secret_key_123';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh_secret_key_456';
 
-export type JWTPayload = {
-    userId: string;
-    email: string;
-    role: string;
-};
-
 export const signAccessToken = (payload: JWTPayload): string => {
     return jwt.sign(payload, JWT_SECRET, {
-        expiresIn: '15m',
+        expiresIn: '1500m',
     });
 };
 

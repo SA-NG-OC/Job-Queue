@@ -3,7 +3,7 @@ import { Request } from 'express';
 export type JWTPayload = {
     userId: string;
     email: string;
-    role: string;
+    role: 'USER' | 'ADMIN';
 };
 
 

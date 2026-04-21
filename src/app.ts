@@ -3,7 +3,12 @@ import helmet from 'helmet';
 import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
-import authRouters from './infrastructure/http/routes/auth.routes';
+import authRouters from './presentation/auth/auth.routes';
+import jobRouters from './presentation/job/job.route';
+import './infrastructure/queue/bullmq/workers/email.worker';
+import './infrastructure/queue/bullmq/workers/media.worker';
+import './infrastructure/queue/bullmq/workers/report.worker';
+import './infrastructure/queue/bullmq/workers/webhook.worker';
 
 dotenv.config();
 
@@ -20,6 +25,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/auth', authRouters);
+app.use('/job', jobRouters);
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

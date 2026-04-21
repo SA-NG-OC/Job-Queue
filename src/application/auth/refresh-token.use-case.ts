@@ -1,6 +1,6 @@
-import { Result, ok, err } from '../../../domain/shared/result';
-import { UserRepository } from '../../../domain/auth/repositories/user.repository';
-import { verifyRefreshToken, signAccessToken, signRefreshToken } from '../../../infrastructure/http/utils/jwt';
+import { Result, ok, err } from '../../domain/shared/result';
+import { UserRepository } from '../../domain/auth/repositories/user.repository';
+import { verifyRefreshToken, signAccessToken, signRefreshToken } from '../../infrastructure/http/utils/jwt';
 
 export type RefreshTokenCommand = { refreshToken: string };
 

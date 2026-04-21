@@ -1,10 +1,10 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../../../db';
 import { users } from '../../../db/schema';
-import { UserRepository } from '../../../domain/auth/repositories/user.repository';
-import { UserEntity, createUserEntity } from '../../../domain/auth/entities/user.entity';
-import { createEmail } from '../../../domain/auth/value-objects/email.vo';
-import { fromHashedString } from '../../../domain/auth/value-objects/password.vo';
+import { UserRepository } from './user.repository';
+import { UserEntity, createUserEntity } from '../entities/user.entity';
+import { createEmail } from '../value-objects/email.vo';
+import { fromHashedString } from '../value-objects/password.vo';
 
 const toEntity = (row: typeof users.$inferSelect): UserEntity => {
     const emailResult = createEmail(row.email);
