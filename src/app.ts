@@ -9,6 +9,7 @@ import './infrastructure/queue/bullmq/workers/email.worker';
 import './infrastructure/queue/bullmq/workers/media.worker';
 import './infrastructure/queue/bullmq/workers/report.worker';
 import './infrastructure/queue/bullmq/workers/webhook.worker';
+import { initCloudinary } from './infrastructure/cloudinary/cloudinary.config';
 
 dotenv.config();
 
@@ -23,6 +24,8 @@ app.use(express.json());
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+initCloudinary();
 
 app.use('/auth', authRouters);
 app.use('/job', jobRouters);

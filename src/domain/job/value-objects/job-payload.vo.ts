@@ -30,8 +30,9 @@ export type GeneratePdfPayload = {
 };
 
 export type ExportCsvPayload = {
-    query: string;
+    query?: string;
     filename: string;
+    data: Record<string, unknown>[];
 };
 
 export type CallWebhookPayload = {
@@ -95,7 +96,7 @@ const validateGeneratePdf = (p: unknown): Result<GeneratePdfPayload> => {
 
 const validateExportCsv = (p: unknown): Result<ExportCsvPayload> => {
     const payload = p as ExportCsvPayload;
-    if (!payload?.query) return err('Thiếu trường query');
+    if (!payload?.data) return err('Thiếu trường data');
     if (!payload?.filename) return err('Thiếu trường filename');
     return ok(payload);
 };
