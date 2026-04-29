@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JobFlow — Bảng điều khiển</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <!-- ===================== AUTH OVERLAY ===================== -->
+    <div id="auth-overlay" class="auth-overlay">
+        <div class="auth-card" id="auth-card">
+            <div class="auth-brand">
+                <div class="auth-logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <rect width="32" height="32" rx="8" fill="var(--accent)" />
+                        <path d="M8 16L13 21L24 10" stroke="white" stroke-width="2.5" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                    <span>JobFlow</span>
+                </div>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <div class="auth-panel" id="login-panel">
+                <h2 class="auth-title">Đăng nhập</h2>
+                <p class="auth-sub">Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục.</p>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="login-email" placeholder="you@example.com" />
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <div class="input-icon-wrap">
+                        <input type="password" id="login-password" placeholder="••••••••" />
+                        <button class="toggle-pass" onclick="togglePass('login-password', this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="login-error" class="form-error hidden"></div>
+                <button class="btn-primary btn-full" onclick="handleLogin()">Đăng nhập</button>
+                <p class="auth-switch">Chưa có tài khoản? <a href="#" onclick="switchPanel('register')">Đăng ký ngay</a>
+                </p>
+            </div>
+
+            <!-- REGISTER FORM -->
+            <div class="auth-panel hidden" id="register-panel">
+                <h2 class="auth-title">Tạo tài khoản</h2>
+                <p class="auth-sub">Điền thông tin để bắt đầu sử dụng JobFlow.</p>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="reg-email" placeholder="you@example.com" />
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <div class="input-icon-wrap">
+                        <input type="password" id="reg-password" placeholder="Tối thiểu 8 ký tự" />
+                        <button class="toggle-pass" onclick="togglePass('reg-password', this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Xác nhận mật khẩu</label>
+                    <div class="input-icon-wrap">
+                        <input type="password" id="reg-confirm" placeholder="Nhập lại mật khẩu" />
+                        <button class="toggle-pass" onclick="togglePass('reg-confirm', this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="reg-error" class="form-error hidden"></div>
+                <button class="btn-primary btn-full" onclick="handleRegister()">Tạo tài khoản</button>
+                <p class="auth-switch">Đã có tài khoản? <a href="#" onclick="switchPanel('login')">Đăng nhập</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== MAIN APP ===================== -->
+    <div id="app" class="app hidden">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+                    <rect width="32" height="32" rx="8" fill="var(--accent)" />
+                    <path d="M8 16L13 21L24 10" stroke="white" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                <span>JobFlow</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-item active" onclick="switchTab('jobs', this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" />
+                        <path d="M8 21h8M12 17v4" />
+                    </svg>
+                    <span>Danh sách Job</span>
+                </button>
+                <button class="nav-item" onclick="switchTab('schedules', this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" />
+                        <path d="M16 2v4M8 2v4M3 10h18" />
+                    </svg>
+                    <span>Lịch chạy</span>
+                </button>
+                <button class="nav-item" onclick="switchTab('webhooks', this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
+                        <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
+                    </svg>
+                    <span>Webhooks</span>
+                </button>
+                <button class="nav-item" onclick="switchTab('audit', this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                        <polyline points="10 9 9 9 8 9" />
+                    </svg>
+                    <span>Nhật ký kiểm toán</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="user-avatar">U</div>
+                    <div class="user-detail">
+                        <span class="user-name" id="user-email-display">user@example.com</span>
+                        <span class="user-role" id="user-role-display">USER</span>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="handleLogout()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+
+            <!-- ===== JOBS TAB ===== -->
+            <section id="tab-jobs" class="tab-content active">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Danh sách Job</h1>
+                        <p class="page-desc">Quản lý và theo dõi các tác vụ xử lý nền</p>
+                    </div>
+                    <button class="btn-primary" onclick="openCreateJobModal()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        Tạo Job mới
+                    </button>
+                </div>
+
+                <div class="filter-bar">
+                    <select id="filter-job-status" class="filter-select" onchange="renderJobsTable()">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="PENDING">PENDING</option>
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="COMPLETED">COMPLETED</option>
+                        <option value="FAILED">FAILED</option>
+                        <option value="CANCELLED">CANCELLED</option>
+                    </select>
+                    <select id="filter-job-type" class="filter-select" onchange="renderJobsTable()">
+                        <option value="">Tất cả loại</option>
+                        <option value="SEND_EMAIL">SEND_EMAIL</option>
+                        <option value="SEND_SMS">SEND_SMS</option>
+                        <option value="RESIZE_IMAGE">RESIZE_IMAGE</option>
+                        <option value="COMPRESS_VIDEO">COMPRESS_VIDEO</option>
+                        <option value="GENERATE_PDF">GENERATE_PDF</option>
+                        <option value="EXPORT_CSV">EXPORT_CSV</option>
+                        <option value="CALL_WEBHOOK">CALL_WEBHOOK</option>
+                    </select>
+                    <div class="filter-spacer"></div>
+                    <button class="btn-secondary btn-sm" onclick="fetchJobs()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="23 4 23 10 17 10" />
+                            <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
+                        </svg>
+                        Tải lại
+                    </button>
+                </div>
+
+                <div class="table-card">
+                    <table class="data-table" id="jobs-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Loại</th>
+                                <th>Trạng thái</th>
+                                <th>Payload</th>
+                                <th>Ưu tiên</th>
+                                <th>Thử lại</th>
+                                <th>Tạo lúc</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jobs-tbody">
+                            <tr>
+                                <td colspan="8" class="loading-cell">
+                                    <div class="spinner"></div> Đang tải...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="pagination" id="jobs-pagination"></div>
+                </div>
+            </section>
+
+            <!-- ===== SCHEDULES TAB ===== -->
+            <section id="tab-schedules" class="tab-content">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Lịch chạy định kỳ</h1>
+                        <p class="page-desc">Quản lý các tác vụ tự động theo lịch cron</p>
+                    </div>
+                    <button class="btn-primary" onclick="openCreateScheduleModal()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        Tạo Schedule
+                    </button>
+                </div>
+
+                <div class="table-card">
+                    <table class="data-table" id="schedules-table">
+                        <thead>
+                            <tr>
+                                <th>Tên</th>
+                                <th>Loại Job</th>
+                                <th>Cron</th>
+                                <th>Payload</th>
+                                <th>Trạng thái</th>
+                                <th>Chạy lần cuối</th>
+                                <th>Chạy tiếp theo</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedules-tbody">
+                            <tr>
+                                <td colspan="8" class="loading-cell">
+                                    <div class="spinner"></div> Đang tải...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="pagination" id="schedules-pagination"></div>
+                </div>
+            </section>
+
+            <!-- ===== WEBHOOKS TAB ===== -->
+            <section id="tab-webhooks" class="tab-content">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Webhooks</h1>
+                        <p class="page-desc">Đăng ký endpoint nhận thông báo sự kiện</p>
+                    </div>
+                    <button class="btn-primary" onclick="openCreateWebhookModal()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        Thêm Webhook
+                    </button>
+                </div>
+
+                <div class="table-card">
+                    <table class="data-table" id="webhooks-table">
+                        <thead>
+                            <tr>
+                                <th>URL</th>
+                                <th>Sự kiện</th>
+                                <th>Trạng thái</th>
+                                <th>Tạo lúc</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="webhooks-tbody">
+                            <tr>
+                                <td colspan="5" class="loading-cell">
+                                    <div class="spinner"></div> Đang tải...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ===== AUDIT TAB ===== -->
+            <section id="tab-audit" class="tab-content">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Nhật ký kiểm toán</h1>
+                        <p class="page-desc">Lịch sử hoạt động và các thay đổi trong hệ thống</p>
+                    </div>
+                </div>
+
+                <div class="filter-bar">
+                    <select id="filter-audit-action" class="filter-select" onchange="renderAuditTable()">
+                        <option value="">Tất cả hành động</option>
+                        <option value="auth.register">auth.register</option>
+                        <option value="auth.login">auth.login</option>
+                        <option value="auth.logout">auth.logout</option>
+                        <option value="job.created">job.created</option>
+                        <option value="job.cancelled">job.cancelled</option>
+                        <option value="job.retried">job.retried</option>
+                        <option value="job.completed">job.completed</option>
+                        <option value="job.failed">job.failed</option>
+                        <option value="schedule.created">schedule.created</option>
+                        <option value="schedule.updated">schedule.updated</option>
+                        <option value="schedule.deleted">schedule.deleted</option>
+                        <option value="schedule.toggled">schedule.toggled</option>
+                        <option value="webhook.registered">webhook.registered</option>
+                        <option value="webhook.deleted">webhook.deleted</option>
+                    </select>
+                    <div class="filter-spacer"></div>
+                    <button class="btn-secondary btn-sm" onclick="fetchAuditLogs()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="23 4 23 10 17 10" />
+                            <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
+                        </svg>
+                        Tải lại
+                    </button>
+                </div>
+
+                <div class="table-card">
+                    <table class="data-table" id="audit-table">
+                        <thead>
+                            <tr>
+                                <th>Hành động</th>
+                                <th>User ID</th>
+                                <th>Job ID</th>
+                                <th>Thông tin thêm</th>
+                                <th>Thời gian</th>
+                            </tr>
+                        </thead>
+                        <tbody id="audit-tbody">
+                            <tr>
+                                <td colspan="5" class="loading-cell">
+                                    <div class="spinner"></div> Đang tải...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="pagination" id="audit-pagination"></div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ===================== MODALS ===================== -->
+
+    <!-- Create Job Modal -->
+    <div class="modal-overlay hidden" id="modal-create-job">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Tạo Job mới</h3>
+                <button class="modal-close" onclick="closeModal('modal-create-job')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Loại Job</label>
+                    <select id="new-job-type" onchange="renderPayloadForm()">
+                        <option value="SEND_EMAIL">SEND_EMAIL</option>
+                        <option value="SEND_SMS">SEND_SMS</option>
+                        <option value="RESIZE_IMAGE">RESIZE_IMAGE</option>
+                        <option value="COMPRESS_VIDEO">COMPRESS_VIDEO</option>
+                        <option value="GENERATE_PDF">GENERATE_PDF</option>
+                        <option value="EXPORT_CSV">EXPORT_CSV</option>
+                        <option value="CALL_WEBHOOK">CALL_WEBHOOK</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Ưu tiên <span class="hint">(0-10)</span></label>
+                        <input type="number" id="new-job-priority" value="5" min="0" max="10" />
+                    </div>
+                    <div class="form-group">
+                        <label>Số lần thử lại tối đa</label>
+                        <input type="number" id="new-job-max-attempts" value="3" min="1" max="10" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Trì hoãn (ms)</label>
+                    <input type="number" id="new-job-delay" value="0" min="0" />
+                </div>
+                <div id="payload-form-container" class="payload-form">
+                    <!-- Dynamic payload fields rendered by JS -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('modal-create-job')">Hủy</button>
+                <button class="btn-primary" onclick="submitCreateJob()">Tạo Job</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Schedule Modal -->
+    <div class="modal-overlay hidden" id="modal-create-schedule">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Tạo Schedule mới</h3>
+                <button class="modal-close" onclick="closeModal('modal-create-schedule')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Tên Schedule</label>
+                    <input type="text" id="new-schedule-name" placeholder="VD: Gửi email hàng ngày lúc 9h" />
+                </div>
+                <div class="form-group">
+                    <label>Loại Job</label>
+                    <select id="new-schedule-type">
+                        <option value="SEND_EMAIL">SEND_EMAIL</option>
+                        <option value="SEND_SMS">SEND_SMS</option>
+                        <option value="RESIZE_IMAGE">RESIZE_IMAGE</option>
+                        <option value="COMPRESS_VIDEO">COMPRESS_VIDEO</option>
+                        <option value="GENERATE_PDF">GENERATE_PDF</option>
+                        <option value="EXPORT_CSV">EXPORT_CSV</option>
+                        <option value="CALL_WEBHOOK">CALL_WEBHOOK</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cron Expression</label>
+                    <input type="text" id="new-schedule-cron" placeholder="VD: 0 9 * * 1-5" />
+                    <div class="cron-presets">
+                        <span class="cron-label">Mẫu nhanh:</span>
+                        <button class="cron-chip" onclick="setCron('* * * * *')">Mỗi phút</button>
+                        <button class="cron-chip" onclick="setCron('0 * * * *')">Mỗi giờ</button>
+                        <button class="cron-chip" onclick="setCron('0 9 * * *')">9h mỗi ngày</button>
+                        <button class="cron-chip" onclick="setCron('0 9 * * 1')">Thứ hai</button>
+                        <button class="cron-chip" onclick="setCron('0 9 1 * *')">Đầu tháng</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Payload (JSON)</label>
+                    <textarea id="new-schedule-payload" rows="4" placeholder='{"key": "value"}'></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('modal-create-schedule')">Hủy</button>
+                <button class="btn-primary" onclick="submitCreateSchedule()">Tạo Schedule</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Webhook Modal -->
+    <div class="modal-overlay hidden" id="modal-create-webhook">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Đăng ký Webhook</h3>
+                <button class="modal-close" onclick="closeModal('modal-create-webhook')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>URL nhận sự kiện</label>
+                    <input type="url" id="new-webhook-url" placeholder="https://your-server.com/webhook" />
+                </div>
+                <div class="form-group">
+                    <label>Sự kiện đăng ký</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" value="job.completed" checked />
+                            job.completed</label>
+                        <label class="checkbox-item"><input type="checkbox" value="job.failed" checked />
+                            job.failed</label>
+                        <label class="checkbox-item"><input type="checkbox" value="job.cancelled" />
+                            job.cancelled</label>
+                        <label class="checkbox-item"><input type="checkbox" value="job.retried" /> job.retried</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('modal-create-webhook')">Hủy</button>
+                <button class="btn-primary" onclick="submitCreateWebhook()">Đăng ký</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal-overlay hidden" id="modal-detail">
+        <div class="modal modal-wide">
+            <div class="modal-header">
+                <h3 id="detail-modal-title">Chi tiết</h3>
+                <button class="modal-close" onclick="closeModal('modal-detail')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" id="detail-modal-body"></div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('modal-detail')">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="main.js"></script>
+</body>
+
+</html>
