@@ -4,11 +4,14 @@ import { createScheduleUseCase, deleteScheduleUseCase, getSchedulesUseCase, togg
 
 export const scheduleController = {
     create: async (req: AuthRequest, res: Response): Promise<void> => {
+        console.log('[Controller] res.json() called');
         const result = await createScheduleUseCase({ ...req.body, userId: req.user!.userId });
+        console.log('[Controller] after res.json()');
         if (!result.success) {
             res.status(400).json({ message: result.error });
             return;
         }
+        res.status(201).json({ message: 'Tạo schedule thành công', schedule: result.value });
     },
 
     getAll: async (req: AuthRequest, res: Response): Promise<void> => {

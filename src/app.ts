@@ -22,6 +22,7 @@ import { startScheduler } from './infrastructure/queue/bullmq/scheduler';
 import { registerAuditListeners } from './infrastructure/events/audit.listener';
 import { registerWebhookListeners } from './infrastructure/events/webhook.listener';
 import { globalRateLimiter } from './infrastructure/http/middlewares/rate-limit.middleware';
+import healthRouter from './presentation/health/health.route';
 
 dotenv.config();
 
@@ -73,6 +74,7 @@ app.use('/job', jobRouters);
 app.use('/schedule', scheduleRouter);
 app.use('/webhook', webhookRouter);
 app.use('/audit', auditRouter);
+app.use('/health', healthRouter);
 
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     console.error(err.stack);
@@ -85,8 +87,7 @@ const bootstrap = async () => {
     await startScheduler();
     app.listen(PORT, () => {
         console.log(`Server:     http://localhost:${PORT}`);
-        console.log(`Bull Board: http://localhost:${PORT}/admin/queues`);
-        console.log(`Docs:       http://localhost:${PORT}/api/docs`);
+        console.log(`Health:     http://localhost:${PORT}/health/ready`);
     });
 };
 

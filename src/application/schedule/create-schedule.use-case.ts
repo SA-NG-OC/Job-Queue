@@ -31,8 +31,10 @@ export const makeCreateScheduleUseCase =
                 meta: { scheduleId: updated.id, name: updated.name, cronExpr: updated.cronExpr.value },
             });
 
-            registerSchedule(updated.id, updated.cronExpr.value, async () => {
-                await enqueueFromSchedule(updated, createJobUseCase);
+            setImmediate(() => {
+                registerSchedule(updated.id, updated.cronExpr.value, async () => {
+                    await enqueueFromSchedule(updated, createJobUseCase);
+                });
             });
 
             return ok(scheduleToJSON(updated));

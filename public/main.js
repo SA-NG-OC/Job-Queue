@@ -121,6 +121,7 @@ async function handleLogin() {
         // Lấy user trực tiếp từ response, không cần gọi /auth/me nữa
         if (data.user) {
             state.user = data.user;
+            localStorage.setItem('current_user', JSON.stringify(data.user)); // thêm dòng này
             document.getElementById('user-email-display').textContent = data.user.email;
             document.getElementById('user-role-display').textContent = data.user.role;
             document.getElementById('user-avatar').textContent = data.user.email[0].toUpperCase();
@@ -159,16 +160,18 @@ async function handleRegister() {
 }
 
 async function loadUser() {
-    try {
-        const data = await api('GET', '/auth/me');
-        if (data) {
-            state.user = data;
-            const email = data.email || 'user@example.com';
-            document.getElementById('user-email-display').textContent = email;
-            document.getElementById('user-role-display').textContent = data.role || 'USER';
-            document.getElementById('user-avatar').textContent = email[0].toUpperCase();
+    const stored = localStorage.getItem('current_user');
+    if (stored) {
+        try {
+            const user = JSON.parse(stored);
+            state.user = user;
+            document.getElementById('user-email-display').textContent = user.email;
+            document.getElementById('user-role-display').textContent = user.role;
+            document.getElementById('user-avatar').textContent = user.email[0].toUpperCase();
+        } catch {
+            localStorage.removeItem('current_user');
         }
-    } catch (e) { /* silently fail */ }
+    }
 }
 
 async function handleLogout() {
@@ -178,6 +181,7 @@ async function handleLogout() {
     localStorage.removeItem('refresh_token'); // thêm dòng này
     document.getElementById('app').classList.add('hidden');
     document.getElementById('auth-overlay').classList.remove('hidden');
+    localStorage.removeItem('current_user');
     showToast('Đã đăng xuất.', 'info');
 }
 
@@ -515,7 +519,43 @@ async function deleteSchedule(id) {
     } catch (e) { showToast(e.message, 'error'); }
 }
 
-function openCreateScheduleModal() { openModal('modal-create-schedule'); }
+function renderSchedulePayloadForm() {
+    const type = document.getElementById('new-schedule-type').value;
+    const fields = PAYLOAD_FIELDS[type] || [];
+    const container = document.getElementById('schedule-payload-form-container');
+
+    if (!fields.length) {
+        container.innerHTML = `<div class="form-group">
+            <label>Payload (JSON)</label>
+            <textarea id="new-schedule-payload" rows="4" placeholder='{"key": "value"}'></textarea>
+        </div>`;
+        return;
+    }
+
+    container.innerHTML = `<div class="payload-form-title">Payload — ${type}</div>` + fields.map(f => {
+        if (f.type === 'select') {
+            return `<div class="form-group">
+                <label>${f.label}</label>
+                <select id="spf-${f.key}">${f.options.map(o => `<option>${o}</option>`).join('')}</select>
+            </div>`;
+        }
+        if (f.type === 'textarea') {
+            return `<div class="form-group">
+                <label>${f.label}</label>
+                <textarea id="spf-${f.key}" rows="3" placeholder="${f.placeholder}"></textarea>
+            </div>`;
+        }
+        return `<div class="form-group">
+            <label>${f.label}</label>
+            <input type="${f.type}" id="spf-${f.key}" placeholder="${f.placeholder}" />
+        </div>`;
+    }).join('');
+}
+
+function openCreateScheduleModal() {
+    renderSchedulePayloadForm(); // render form payload ngay khi mở
+    openModal('modal-create-schedule');
+}
 
 function setCron(expr) {
     document.getElementById('new-schedule-cron').value = expr;
@@ -525,13 +565,32 @@ async function submitCreateSchedule() {
     const name = document.getElementById('new-schedule-name').value.trim();
     const jobType = document.getElementById('new-schedule-type').value;
     const cronExpr = document.getElementById('new-schedule-cron').value.trim();
-    const payloadRaw = document.getElementById('new-schedule-payload').value.trim();
 
     if (!name || !cronExpr) { showToast('Vui lòng điền tên và cron expression.', 'error'); return; }
 
+    // Build payload từ form động (giống submitCreateJob)
+    const fields = PAYLOAD_FIELDS[jobType] || [];
     let payload = {};
-    try { payload = payloadRaw ? JSON.parse(payloadRaw) : {}; }
-    catch { showToast('Payload không phải JSON hợp lệ.', 'error'); return; }
+
+    if (fields.length) {
+        for (const f of fields) {
+            const el = document.getElementById(`spf-${f.key}`);
+            if (!el) continue;
+            const val = el.value.trim();
+            if (!val) continue;
+            if (f.type === 'number') { payload[f.key] = Number(val); continue; }
+            if (f.type === 'textarea' && f.key !== 'body' && f.key !== 'message') {
+                try { payload[f.key] = JSON.parse(val); } catch { payload[f.key] = val; }
+            } else {
+                payload[f.key] = val;
+            }
+        }
+    } else {
+        // Fallback textarea JSON nếu không có PAYLOAD_FIELDS cho type này
+        const raw = document.getElementById('new-schedule-payload')?.value.trim();
+        try { payload = raw ? JSON.parse(raw) : {}; }
+        catch { showToast('Payload không phải JSON hợp lệ.', 'error'); return; }
+    }
 
     try {
         await api('POST', '/schedule/schedules', { name, jobType, cronExpr, payload });
@@ -1016,12 +1075,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check if already logged in
     if (state.token) {
         loadUser().then(() => {
-            showApp();
+            if (state.user) {
+                showApp();
+            } else {
+                // loadUser thất bại, token không còn hợp lệ
+                handleLogout();
+            }
         });
-    } else {
-        // Demo mode: auto-populate credentials hint
-        document.getElementById('login-email').value = 'demo@example.com';
-        document.getElementById('login-password').value = 'demo1234';
     }
 
     // Override fetchJobs to use demo data by default
