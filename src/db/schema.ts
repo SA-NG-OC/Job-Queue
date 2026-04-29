@@ -59,6 +59,9 @@ export const schedules = pgTable('schedules', {
     lastRunAt: timestamp('last_run_at'),
     nextRunAt: timestamp('next_run_at'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
+    userId: uuid('user_id')
+        .notNull()
+        .references(() => users.id, { onDelete: 'cascade' }),
 });
 
 export const webhooks = pgTable('webhooks', {
@@ -95,4 +98,11 @@ export const jobsRelations = relations(jobs, ({ one, many }) => ({
 export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
     user: one(users, { fields: [auditLogs.userId], references: [users.id] }),
     job: one(jobs, { fields: [auditLogs.jobId], references: [jobs.id] }),
+}));
+
+export const schedulesRelations = relations(schedules, ({ one }) => ({
+    user: one(users, {
+        fields: [schedules.userId],
+        references: [users.id],
+    }),
 }));

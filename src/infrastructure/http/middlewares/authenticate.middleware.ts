@@ -14,7 +14,10 @@ export const authenticate = (
             return;
         }
         const token = authHeader.split(' ')[1];
-        req.user = verifyAccessToken(token) || undefined;
+        const decoded = verifyAccessToken(token);
+        console.log('decoded:', decoded);
+
+        req.user = decoded || undefined;
         next();
     } catch {
         res.status(401).json({ message: 'Token hết hạn hoặc không hợp lệ' });
