@@ -2,6 +2,7 @@ import { jobToJSON } from "../../domain/job/entities/job.entity";
 import { JobRepository } from "../../domain/job/repositories/job.repository";
 import { buildNewJob } from "../../domain/job/services/job.domain.service";
 import { err, ok, Result } from "../../domain/shared/result";
+import { emitAudit } from "../../infrastructure/events/audit.listener";
 import { getQueueByJobType } from "../../infrastructure/queue/bullmq/client";
 
 export type CreateJobCommand = {
@@ -21,6 +22,14 @@ export const makeCreateJobUseCase = (jobRepo: JobRepository) =>
         const job = jobResult.value;
 
         const saved = await jobRepo.save(job);
+
+        // Ghi log
+        emitAudit({
+            action: 'job.created',
+            userId: saved.userId,
+            jobId: saved.id,
+            meta: { type: saved.type, priority: saved.priority },
+        });
 
         const queue = getQueueByJobType(job.type);
         await queue.add(job.type, {

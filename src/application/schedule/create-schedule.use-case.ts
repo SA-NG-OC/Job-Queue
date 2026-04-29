@@ -4,15 +4,14 @@ import { buildNewSchedule, createScheduleInput } from "../../domain/schedule/ser
 import { err, ok, Result } from "../../domain/shared/result";
 import parser from 'cron-parser';
 import { registerSchedule } from "../../infrastructure/queue/bullmq/scheduler";
-import { jobDrizzleRepository } from "../../domain/job/repositories/job.drizzle.repository";
-import { makeCreateJobUseCase } from "../job/create-job.use-case";
+
 import { JobRepository } from "../../domain/job/repositories/job.repository";
 import { enqueueFromSchedule } from "./helpers/enqueue-from-schedule";
-
-const createJob = makeCreateJobUseCase(jobDrizzleRepository);
+import { emitAudit } from "../../infrastructure/events/audit.listener";
+import { createJobUseCase } from "../../container";
 
 export const makeCreateScheduleUseCase =
-    (scheduleRepo: ScheduleRepository, jobRepo: JobRepository) =>
+    (scheduleRepo: ScheduleRepository) =>
         async (cmd: createScheduleInput): Promise<Result<ReturnType<typeof scheduleToJSON>>> => {
 
             const scheduleResult = buildNewSchedule(cmd);
@@ -28,8 +27,14 @@ export const makeCreateScheduleUseCase =
                 nextRunAt,
             });
 
+            emitAudit({
+                action: 'schedule.created',
+                userId: cmd.userId,
+                meta: { scheduleId: updated.id, name: updated.name, cronExpr: updated.cronExpr.value },
+            });
+
             registerSchedule(updated.id, updated.cronExpr.value, async () => {
-                await enqueueFromSchedule(updated, jobRepo);
+                await enqueueFromSchedule(updated, createJobUseCase);
             });
 
             return ok(scheduleToJSON(updated));

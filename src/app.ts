@@ -10,7 +10,7 @@ import './infrastructure/queue/bullmq/workers/media.worker';
 import './infrastructure/queue/bullmq/workers/report.worker';
 import './infrastructure/queue/bullmq/workers/webhook.worker';
 import { initCloudinary } from './infrastructure/cloudinary/cloudinary.config';
-
+import path from 'path';
 import { createBullBoard } from '@bull-board/api';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { ExpressAdapter } from '@bull-board/express';
@@ -20,6 +20,7 @@ import webhookRouter from './presentation/webhook/webhook.route';
 import auditRouter from './presentation/audit/audit.route';
 import { startScheduler } from './infrastructure/queue/bullmq/scheduler';
 import { registerAuditListeners } from './infrastructure/events/audit.listener';
+import { registerWebhookListeners } from './infrastructure/events/webhook.listener';
 
 dotenv.config();
 
@@ -78,6 +79,7 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 
 const bootstrap = async () => {
     registerAuditListeners();
+    registerWebhookListeners();
     await startScheduler();
     app.listen(PORT, () => {
         console.log(`Server:     http://localhost:${PORT}`);
@@ -87,5 +89,6 @@ const bootstrap = async () => {
 };
 
 bootstrap().catch(console.error);
+app.use(express.static(path.join(__dirname, '../public')));
 
 export default app;

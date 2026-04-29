@@ -1,6 +1,8 @@
 import { incrementJobAttempts, jobToJSON } from "../../domain/job/entities/job.entity";
 import { JobRepository } from "../../domain/job/repositories/job.repository";
 import { err, ok, Result } from "../../domain/shared/result";
+import { emitAudit } from "../../infrastructure/events/audit.listener";
+import { emitWebhook } from "../../infrastructure/events/webhook.listener";
 import { getQueueByJobType } from "../../infrastructure/queue/bullmq/client";
 
 export const makeRetryJobUseCase =
@@ -15,6 +17,19 @@ export const makeRetryJobUseCase =
             if (!retried.success) return err(retried.error);
 
             const updated = await jobRepo.update(retried.value);
+
+            emitAudit({
+                action: 'job.retried',
+                userId: userId,
+                jobId: updated.id,
+                meta: { attempts: updated.attempts, retriedAt: new Date() },
+            });
+
+            emitWebhook({
+                event: 'job.retried',
+                jobId: updated.id,
+                data: { type: updated.type, attempts: updated.attempts, userId: updated.userId },
+            });
 
             // Re-enqueue
             const queue = getQueueByJobType(job.type);

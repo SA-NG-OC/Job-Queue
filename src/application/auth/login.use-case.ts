@@ -3,6 +3,7 @@ import { UserRepository } from '../../domain/auth/repositories/user.repository';
 import { validateCredentials } from '../../domain/auth/services/auth.domain.service';
 import { userToJSON } from '../../domain/auth/entities/user.entity';
 import { signAccessToken, signRefreshToken } from '../../infrastructure/http/utils/jwt';
+import { emitAudit } from '../../infrastructure/events/audit.listener';
 
 export type LoginCommand = { email: string; password: string };
 
@@ -18,6 +19,12 @@ export const makeLoginUseCase =
             if (!credResult.success) return err(credResult.error);
 
             const payload = { userId: user.id, email: user.email.value, role: user.role };
+
+            emitAudit({
+                action: 'auth.login',
+                userId: user.id,
+                meta: { email: user.email.value, role: user.role },
+            });
 
             return ok({
                 user: userToJSON(user),

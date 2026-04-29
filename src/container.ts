@@ -40,9 +40,9 @@ export const cancelJobUseCase = makeCancelJobUseCase(jobRepo);
 export const retryJobUseCase = makeRetryJobUseCase(jobRepo);
 
 // ── Schedule ──────────────────────────────────────────────
-export const createScheduleUseCase = makeCreateScheduleUseCase(scheduleRepo, jobRepo);
-export const updateScheduleUseCase = makeUpdateScheduleUseCase(scheduleRepo, jobRepo);
-export const toggleScheduleUseCase = makeToggleScheduleUseCase(scheduleRepo, jobRepo);
+export const createScheduleUseCase = makeCreateScheduleUseCase(scheduleRepo);
+export const updateScheduleUseCase = makeUpdateScheduleUseCase(scheduleRepo);
+export const toggleScheduleUseCase = makeToggleScheduleUseCase(scheduleRepo);
 export const deleteScheduleUseCase = makeDeleteScheduleUseCase(scheduleRepo);
 export const getSchedulesUseCase = makeGetSchedulesUseCase(scheduleRepo);
 

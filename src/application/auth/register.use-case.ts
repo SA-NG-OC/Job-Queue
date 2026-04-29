@@ -3,6 +3,7 @@ import { UserRepository } from '../../domain/auth/repositories/user.repository';
 import { buildNewUser } from '../../domain/auth/services/auth.domain.service';
 import { userToJSON } from '../../domain/auth/entities/user.entity';
 import { signAccessToken, signRefreshToken } from '../../infrastructure/http/utils/jwt';
+import { emitAudit } from '../../infrastructure/events/audit.listener';
 
 export type RegisterCommand = { email: string; password: string };
 
@@ -21,6 +22,14 @@ export const makeRegisterUseCase = (userRepo: UserRepository) => {
         if (!userResult.success) return err(userResult.error);
 
         const saved = await userRepo.save(userResult.value);
+
+        // Ghi log
+        emitAudit({
+            action: 'auth.register',
+            userId: saved.id,
+            meta: { email: saved.email.value, role: saved.role },
+        });
+
         const payload = { userId: saved.id, email: saved.email.value, role: saved.role };
         return ok({
             user: userToJSON(saved),

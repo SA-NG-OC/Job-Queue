@@ -7,8 +7,8 @@ import { webhookController } from "./webhook.controller";
 const webhookRouter = Router();
 webhookRouter.use(authenticate);
 
-webhookRouter.post('/webhooks', authorizeRoles('USER', 'ADMIN'), validate(registerWebhookSchema), webhookController.register);
-webhookRouter.get('/webhooks', authorizeRoles('USER', 'ADMIN'), webhookController.getAll);
-webhookRouter.delete('/webhooks/:id', authorizeRoles('USER', 'ADMIN'), validate(webhookIdSchema), webhookController.delete);
+webhookRouter.post('/', authorizeRoles('USER', 'ADMIN'), validate(registerWebhookSchema), webhookController.register);
+webhookRouter.get('/', authorizeRoles('USER', 'ADMIN'), webhookController.getAll);
+webhookRouter.delete('/:id', authorizeRoles('USER', 'ADMIN'), validate(webhookIdSchema), webhookController.delete);
 
 export default webhookRouter;

@@ -4,6 +4,7 @@ import { processEmailJob, processSmsJob } from '../../processors/email.processor
 import { JobType } from '../../../../domain/job/value-objects/job-type.vo';
 import { markJobStarted, markJobCompleted, markJobFailed } from '../../../../domain/job/entities/job.entity';
 import { jobDrizzleRepository } from '../../../../domain/job/repositories/job.drizzle.repository';
+import { emitWebhook } from '../../../events/webhook.listener';
 
 export const emailWorker = new Worker(
     'email',
@@ -29,10 +30,20 @@ export const emailWorker = new Worker(
                 : await processSmsJob(payload as any);
 
             await jobDrizzleRepository.update(markJobCompleted(job, result));
+            emitWebhook({
+                event: 'job.completed',
+                jobId: job.id,
+                data: { type: job.type, result, userId: job.userId },
+            });
             return result;
         } catch (error) {
             const errMsg = error instanceof Error ? error.message : 'Unknown error';
             await jobDrizzleRepository.update(markJobFailed(job, errMsg));
+            emitWebhook({
+                event: 'job.failed',
+                jobId: job.id,
+                data: { type: job.type, error: errMsg, attempts: job.attempts, userId: job.userId },
+            });
             throw error;
         }
     },

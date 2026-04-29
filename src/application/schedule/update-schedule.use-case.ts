@@ -9,6 +9,8 @@ import { err, ok, Result } from "../../domain/shared/result";
 import parser from 'cron-parser';
 import { registerSchedule, stopSchedule } from "../../infrastructure/queue/bullmq/scheduler";
 import { enqueueFromSchedule } from "./helpers/enqueue-from-schedule";
+import { emitAudit } from "../../infrastructure/events/audit.listener";
+import { createJobUseCase } from "../../container";
 
 export type UpdateScheduleCommand = {
     id: string;
@@ -20,7 +22,7 @@ export type UpdateScheduleCommand = {
 };
 
 export const makeUpdateScheduleUseCase =
-    (scheduleRepo: ScheduleRepository, jobRepo: JobRepository) =>
+    (scheduleRepo: ScheduleRepository) =>
         async (cmd: UpdateScheduleCommand): Promise<Result<ReturnType<typeof scheduleToJSON>>> => {
 
             const schedule = await scheduleRepo.findById(cmd.id);
@@ -57,11 +59,17 @@ export const makeUpdateScheduleUseCase =
                 nextRunAt,
             });
 
+            emitAudit({
+                action: 'schedule.updated',
+                userId: cmd.requesterId,
+                meta: { scheduleId: saved.id, changes: { name: cmd.name, cronExpr: cmd.cronExpr, payload: cmd.payload } },
+            });
+
             stopSchedule(saved.id);
 
             try {
                 registerSchedule(saved.id, saved.cronExpr.value, async () => {
-                    await enqueueFromSchedule(saved, jobRepo);
+                    await enqueueFromSchedule(saved, createJobUseCase);
                 });
             } catch (e) {
                 console.error("Failed to re-register schedule", e);

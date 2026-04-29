@@ -4,6 +4,7 @@ import { markJobCompleted, markJobFailed, markJobStarted } from '../../../../dom
 import { redisConnection } from '../client';
 import { processCompressVideoJob, processResizeImageJob } from '../../processors/media.processor';
 import { JobType } from '../../../../domain/job/value-objects/job-type.vo';
+import { emitWebhook } from '../../../events/webhook.listener';
 
 export const mediaWorker = new Worker('media',
     async (bullJob: Job) => {
@@ -24,10 +25,20 @@ export const mediaWorker = new Worker('media',
                 : await processCompressVideoJob(payload as any);
 
             await jobDrizzleRepository.update(markJobCompleted(job, result));
+            emitWebhook({
+                event: 'job.completed',
+                jobId: job.id,
+                data: { type: job.type, result, userId: job.userId },
+            });
             return result;
         } catch (error) {
             const errMsg = error instanceof Error ? error.message : 'Unknown error';
             await jobDrizzleRepository.update(markJobFailed(job, errMsg));
+            emitWebhook({
+                event: 'job.failed',
+                jobId: job.id,
+                data: { type: job.type, error: errMsg, attempts: job.attempts, userId: job.userId },
+            });
             throw error;
         }
     },

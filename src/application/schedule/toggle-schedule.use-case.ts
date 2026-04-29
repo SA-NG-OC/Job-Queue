@@ -6,9 +6,11 @@ import { err, ok, Result } from "../../domain/shared/result";
 import { registerSchedule, stopSchedule } from "../../infrastructure/queue/bullmq/scheduler";
 import parser from "cron-parser";
 import { enqueueFromSchedule } from "./helpers/enqueue-from-schedule";
+import { emitAudit } from "../../infrastructure/events/audit.listener";
+import { createJobUseCase } from "../../container";
 
 export const makeToggleScheduleUseCase =
-    (scheduleRepo: ScheduleRepository, jobRepo: JobRepository) =>
+    (scheduleRepo: ScheduleRepository) =>
         async (
             id: string,
             requesterId: string,
@@ -26,6 +28,12 @@ export const makeToggleScheduleUseCase =
 
             let saved = await scheduleRepo.update(toggled);
 
+            emitAudit({
+                action: 'schedule.toggled',
+                userId: requesterId,
+                meta: { scheduleId: saved.id, isActive: saved.isActive },
+            });
+
             if (saved.isActive) {
                 const interval = parser.parseExpression(saved.cronExpr.value);
                 const nextRunAt = interval.next().toDate();
@@ -36,7 +44,7 @@ export const makeToggleScheduleUseCase =
                 });
 
                 registerSchedule(saved.id, saved.cronExpr.value, async () => {
-                    await enqueueFromSchedule(saved, jobRepo);
+                    await enqueueFromSchedule(saved, createJobUseCase);
                 });
 
             } else {
