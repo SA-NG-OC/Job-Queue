@@ -21,6 +21,7 @@ import auditRouter from './presentation/audit/audit.route';
 import { startScheduler } from './infrastructure/queue/bullmq/scheduler';
 import { registerAuditListeners } from './infrastructure/events/audit.listener';
 import { registerWebhookListeners } from './infrastructure/events/webhook.listener';
+import { globalRateLimiter } from './infrastructure/http/middlewares/rate-limit.middleware';
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use(helmet());
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
+app.use(globalRateLimiter);
 
 const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/admin/queues');

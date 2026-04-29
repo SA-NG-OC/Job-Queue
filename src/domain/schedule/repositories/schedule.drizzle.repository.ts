@@ -1,4 +1,4 @@
-import { eq, and, count } from 'drizzle-orm';
+import { eq, and, count, desc } from 'drizzle-orm';
 import { ScheduleRepository, ScheduleFilter, PaginatedSchedules } from '../../../domain/schedule/repositories/schedule.repository';
 import { ScheduleEntity, createScheduleEntity } from '../../../domain/schedule/entities/schedule.entity';
 import { JobType } from '../../../domain/job/value-objects/job-type.vo';
@@ -43,7 +43,7 @@ export const scheduleDrizzleRepository: ScheduleRepository = {
         const where = conditions.length > 0 ? and(...conditions) : undefined;
 
         const [rows, [{ value: total }]] = await Promise.all([
-            db.query.schedules.findMany({ where, limit, offset }),
+            db.query.schedules.findMany({ where, limit, offset, orderBy: desc(schedules.createdAt), }),
             db.select({ value: count() }).from(schedules).where(where),
         ]);
         return { data: rows.map(toEntity), total: Number(total), page, limit };

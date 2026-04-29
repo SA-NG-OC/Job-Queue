@@ -4,8 +4,6 @@ import { buildNewSchedule, createScheduleInput } from "../../domain/schedule/ser
 import { err, ok, Result } from "../../domain/shared/result";
 import parser from 'cron-parser';
 import { registerSchedule } from "../../infrastructure/queue/bullmq/scheduler";
-
-import { JobRepository } from "../../domain/job/repositories/job.repository";
 import { enqueueFromSchedule } from "./helpers/enqueue-from-schedule";
 import { emitAudit } from "../../infrastructure/events/audit.listener";
 import { createJobUseCase } from "../../container";

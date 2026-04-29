@@ -1,4 +1,4 @@
-import { and, count, eq } from "drizzle-orm";
+import { and, count, eq, desc } from "drizzle-orm";
 import { db } from "../../../db";
 import { jobs } from "../../../db/schema";
 import { createJobEntity, JobEntity } from "../entities/job.entity";
@@ -43,7 +43,7 @@ export const jobDrizzleRepository: JobRepository = {
         const where = conditions.length > 0 ? and(...conditions) : undefined;
 
         const [rows, [{ value: total }]] = await Promise.all([
-            db.query.jobs.findMany({ where, limit, offset }),
+            db.query.jobs.findMany({ where, limit, offset, orderBy: desc(jobs.createdAt), }),
             db.select({ value: count() }).from(jobs).where(where),
         ]);
 

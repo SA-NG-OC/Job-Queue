@@ -14,8 +14,11 @@ export const jobController = {
 
     getJobs: async (req: AuthRequest, res: Response): Promise<void> => {
         const result = await getJobsUseCase({
-            ...req.query,
             userId: req.user!.userId,
+            page: req.query.page ? Math.max(1, Number(req.query.page)) : 1,
+            limit: req.query.limit ? Math.min(Number(req.query.limit), 100) : 10,
+            status: req.query.status as any,
+            type: req.query.type as any,
         });
         if (!result.success) { res.status(400).json({ message: result.error }); return; }
         res.status(200).json(result.value);
