@@ -1,14 +1,21 @@
 import nodemailer from 'nodemailer';
+import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import { SendEmailPayload, SendSmsPayload } from '../../../domain/job/value-objects/job-payload.vo';
 
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.mailtrap.io',
+const smtpOptions: SMTPTransport.Options = {
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: Number(process.env.SMTP_PORT) || 587,
+    secure: false,
     auth: {
         user: process.env.SMTP_USER || '',
         pass: process.env.SMTP_PASS || '',
     },
-});
+    tls: {
+        family: 4
+    } as any
+};
+
+const transporter = nodemailer.createTransport(smtpOptions);
 
 export const processEmailJob = async (
     payload: SendEmailPayload
