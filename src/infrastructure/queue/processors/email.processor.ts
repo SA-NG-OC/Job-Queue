@@ -1,20 +1,30 @@
-import { Resend } from 'resend';
 import { SendEmailPayload, SendSmsPayload } from '../../../domain/job/value-objects/job-payload.vo';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const processEmailJob = async (
     payload: SendEmailPayload
 ): Promise<Record<string, unknown>> => {
-    const { data, error } = await resend.emails.send({
-        from: process.env.MAIL_FROM || 'onboarding@resend.dev',
-        to: payload.to,
-        subject: payload.subject,
-        html: payload.body,
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+            'accept': 'application/json',
+            'content-type': 'application/json',
+            'api-key': process.env.BREVO_API_KEY || '',
+        },
+        body: JSON.stringify({
+            sender: { email: process.env.MAIL_FROM || 'noreply@example.com', name: 'Job Queue API' },
+            to: [{ email: payload.to }],
+            subject: payload.subject,
+            htmlContent: payload.body,
+        }),
     });
 
-    if (error) throw new Error(error.message);
-    return { messageId: data?.id, accepted: [payload.to] };
+    const json = await response.json() as Record<string, unknown>;
+
+    if (!response.ok) {
+        throw new Error((json.message as string) || `Brevo error: ${response.status}`);
+    }
+
+    return { messageId: json['messageId'], accepted: [payload.to] };
 };
 
 export const processSmsJob = async (
