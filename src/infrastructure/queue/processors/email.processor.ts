@@ -1,32 +1,20 @@
-import nodemailer from 'nodemailer';
-import SMTPTransport from 'nodemailer/lib/smtp-transport';
+import { Resend } from 'resend';
 import { SendEmailPayload, SendSmsPayload } from '../../../domain/job/value-objects/job-payload.vo';
 
-const smtpOptions: SMTPTransport.Options = {
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: Number(process.env.SMTP_PORT) || 587,
-    secure: false,
-    auth: {
-        user: process.env.SMTP_USER || '',
-        pass: process.env.SMTP_PASS || '',
-    },
-    tls: {
-        family: 4
-    } as any
-};
-
-const transporter = nodemailer.createTransport(smtpOptions);
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const processEmailJob = async (
     payload: SendEmailPayload
 ): Promise<Record<string, unknown>> => {
-    const info = await transporter.sendMail({
-        from: process.env.MAIL_FROM || 'noreply@app.com',
+    const { data, error } = await resend.emails.send({
+        from: process.env.MAIL_FROM || 'onboarding@resend.dev',
         to: payload.to,
         subject: payload.subject,
         html: payload.body,
     });
-    return { messageId: info.messageId, accepted: info.accepted };
+
+    if (error) throw new Error(error.message);
+    return { messageId: data?.id, accepted: [payload.to] };
 };
 
 export const processSmsJob = async (
