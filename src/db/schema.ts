@@ -1,6 +1,6 @@
 import {
     pgTable, uuid, text, timestamp, integer,
-    boolean, jsonb, pgEnum
+    boolean, jsonb, pgEnum, index, uniqueIndex
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -20,7 +20,11 @@ export const users = pgTable('users', {
     role: roleEnum('role').default('USER').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+}, (t) => [
+    uniqueIndex('users_email_idx').on(t.email),
+    index('users_role_idx').on(t.role),
+    index('users_created_at_idx').on(t.createdAt),
+]);
 
 export const apiKeys = pgTable('api_keys', {
     id: uuid('id').primaryKey().defaultRandom(),
@@ -29,7 +33,11 @@ export const apiKeys = pgTable('api_keys', {
     userId: uuid('user_id').notNull().references(() => users.id),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     expiresAt: timestamp('expires_at'),
-});
+}, (t) => [
+    uniqueIndex('api_keys_key_idx').on(t.key),
+    index('api_keys_user_id_idx').on(t.userId),
+    index('api_keys_expires_at_idx').on(t.expiresAt),
+]);
 
 export const jobs = pgTable('jobs', {
     id: uuid('id').primaryKey().defaultRandom(),
@@ -47,7 +55,13 @@ export const jobs = pgTable('jobs', {
     completedAt: timestamp('completed_at'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     userId: uuid('user_id').notNull().references(() => users.id),
-});
+}, (t) => [
+    index('jobs_status_priority_idx').on(t.status, t.priority),
+    index('jobs_user_id_status_idx').on(t.userId, t.status),
+    index('jobs_type_idx').on(t.type),
+    index('jobs_scheduled_at_idx').on(t.scheduledAt),
+    index('jobs_created_at_idx').on(t.createdAt),
+]);
 
 export const schedules = pgTable('schedules', {
     id: uuid('id').primaryKey().defaultRandom(),
@@ -62,7 +76,10 @@ export const schedules = pgTable('schedules', {
     userId: uuid('user_id')
         .notNull()
         .references(() => users.id, { onDelete: 'cascade' }),
-});
+}, (t) => [
+    index('schedules_is_active_next_run_at_idx').on(t.isActive, t.nextRunAt),
+    index('schedules_user_id_idx').on(t.userId),
+]);
 
 export const webhooks = pgTable('webhooks', {
     id: uuid('id').primaryKey().defaultRandom(),
@@ -71,7 +88,10 @@ export const webhooks = pgTable('webhooks', {
     userId: uuid('user_id').notNull().references(() => users.id),
     isActive: boolean('is_active').default(true).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+}, (t) => [
+    index('webhooks_is_active_idx').on(t.isActive),
+    index('webhooks_user_id_idx').on(t.userId),
+]);
 
 export const auditLogs = pgTable('audit_logs', {
     id: uuid('id').primaryKey().defaultRandom(),
@@ -80,9 +100,12 @@ export const auditLogs = pgTable('audit_logs', {
     jobId: uuid('job_id').references(() => jobs.id),
     meta: jsonb('meta'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+}, (t) => [
+    index('audit_logs_user_id_created_at_idx').on(t.userId, t.createdAt),
+    index('audit_logs_job_id_idx').on(t.jobId),
+    index('audit_logs_created_at_idx').on(t.createdAt),
+]);
 
-// Relations
 export const usersRelations = relations(users, ({ many }) => ({
     apiKeys: many(apiKeys),
     jobs: many(jobs),
