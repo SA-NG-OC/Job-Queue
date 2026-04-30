@@ -92,9 +92,7 @@ logAuditUseCase()                   dispatchWebhookUseCase()
 | **Auth** | JWT (Access + Refresh token rotation) |
 | **Validation** | Zod |
 | **Media** | Sharp (resize ảnh) + Cloudinary (storage) |
-| **Email** | Nodemailer (Gmail SMTP) |
 | **PDF** | PDFKit |
-| **Monitoring** | Bull Board UI |
 | **Container** | Docker + Docker Compose |
 
 ---
