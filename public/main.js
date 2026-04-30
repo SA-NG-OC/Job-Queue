@@ -1,7 +1,7 @@
 /* ============================
    CONFIG & STATE
 ============================ */
-const API_BASE = 'http://localhost:3000';
+const API_BASE = window.location.origin;
 
 const state = {
     token: localStorage.getItem('access_token') || null,
@@ -416,8 +416,8 @@ function renderPayloadForm() {
         if (f.type === 'textarea') {
             return `<div class="form-group">
         <label>${f.label}</label>
-        <textarea id="pf-${f.key}" rows="3" placeholder="${f.placeholder}"></textarea>
-      </div>`;
+        <textarea id="pf-${f.key}" rows="3">${f.placeholder || ''}</textarea>
+    </div>`;
         }
         return `<div class="form-group">
       <label>${f.label}</label>

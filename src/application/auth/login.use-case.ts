@@ -12,7 +12,6 @@ export const makeLoginUseCase =
         async (cmd: LoginCommand): Promise<Result<{ user: object; accessToken: string; refreshToken: string }>> => {
             const user = await userRepo.findByEmail(cmd.email);
 
-            // Trả cùng 1 message để tránh user enumeration attack
             if (!user) return err('Email hoặc mật khẩu không đúng');
 
             const credResult = await validateCredentials(cmd.password, user);

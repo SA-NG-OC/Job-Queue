@@ -29,8 +29,10 @@ RUN npm ci
 # Copy code đã build từ stage trước
 COPY --from=builder /app/dist ./dist
 
+COPY --from=builder /app/src/infrastructure/queue/processors/fonts \
+    ./dist/infrastructure/queue/processors/fonts
+
 # QUAN TRỌNG: Copy thư mục chứa các file migration của Drizzle
-# (Thường tên là 'drizzle' hoặc 'migrations', bạn đổi tên cho đúng nhé)
 COPY --from=builder /app/drizzle ./drizzle
 
 # Tạo các thư mục output và phân quyền cho user 'node'

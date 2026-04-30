@@ -39,46 +39,46 @@ export const processGeneratePdfJob = async (
 };
 
 // ======================= CSV =======================
-
 export const processExportCsvJob = async (
     payload: ExportCsvPayload,
 ): Promise<Record<string, unknown>> => {
-
+    const cleanFilename = payload.filename.replace(/\.csv$/, '');
     const tmpPath = path.join(
         os.tmpdir(),
-        payload.filename.endsWith('.csv')
-            ? payload.filename
-            : `${payload.filename}_${Date.now()}.csv`
+        `${cleanFilename}_${Date.now()}.csv`
     );
 
     try {
-        const rows: Record<string, unknown>[] = (payload as any).data ?? [
-            {
-                id: 1,
-                name: 'Sample Row',
-                query: payload.query,
-                createdAt: new Date().toISOString(),
-            },
-        ];
+        const rows = payload.data || [];
+        fs.writeFileSync(tmpPath, '\uFEFF', 'utf8');
 
-        if (rows.length === 0) {
-            fs.writeFileSync(tmpPath, '');
-        } else {
+        if (rows.length > 0) {
             const headers = Object.keys(rows[0]).map((key) => ({
                 id: key,
-                title: key.toUpperCase(),
+                title: key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase()).trim(),
             }));
 
             const csvWriter = createObjectCsvWriter({
                 path: tmpPath,
                 header: headers,
+                append: true,
+                encoding: 'utf8',
             });
 
-            await csvWriter.writeRecords(rows);
+            const formattedRows = rows.map(row => {
+                const newRow = { ...row };
+                for (const key in newRow) {
+                    if (newRow[key] instanceof Date) {
+                        newRow[key] = (newRow[key] as Date).toLocaleString('vi-VN');
+                    }
+                }
+                return newRow;
+            });
+
+            await csvWriter.writeRecords(formattedRows);
         }
 
         const fileSize = fs.statSync(tmpPath).size;
-
         const uploadResult = await CloudinaryService.uploadRaw(tmpPath);
 
         return {
@@ -93,47 +93,52 @@ export const processExportCsvJob = async (
     } catch (error: any) {
         throw new Error(`CSV export failed: ${error.message}`);
     } finally {
-        safeUnlink(tmpPath);
+        if (fs.existsSync(tmpPath)) {
+            fs.unlinkSync(tmpPath);
+        }
     }
 };
 
 // ======================= PDF BUILDER =======================
 
-function buildPdfBuffer(payload: GeneratePdfPayload): Promise<Buffer> {
+async function buildPdfBuffer(payload: GeneratePdfPayload): Promise<Buffer> {
     return new Promise((resolve, reject) => {
         const doc = new PDFDocument({ margin: 50 });
         const chunks: Buffer[] = [];
+
+        const fontPath = path.join(__dirname, 'fonts/Roboto-Regular.ttf');
+        const fontBoldPath = path.join(__dirname, 'fonts/Roboto-Bold.ttf');
 
         doc.on('data', (chunk) => chunks.push(chunk));
         doc.on('error', reject);
         doc.on('end', () => resolve(Buffer.concat(chunks)));
 
-        // Header
+        // Header - Sử dụng font Bold đã đăng ký
         doc
+            .font(fontBoldPath)
             .fontSize(22)
-            .font('Helvetica-Bold')
-            .text(`Report: ${payload.templateId}`, { align: 'center' });
+            .text(`Báo cáo: ${payload.templateId}`, { align: 'center' });
 
         doc.moveDown();
 
         doc
+            .font(fontPath)
             .fontSize(10)
-            .font('Helvetica')
-            .text(`Generated: ${new Date().toISOString()}`, { align: 'center' });
+            .text(`Ngày tạo: ${new Date().toLocaleString('vi-VN')}`, { align: 'center' });
 
         doc.moveDown(2);
 
         // Data
         doc
+            .font(fontBoldPath)
             .fontSize(12)
-            .font('Helvetica-Bold')
-            .text('Data:', { underline: true });
+            .text('Dữ liệu chi tiết:', { underline: true });
 
         doc.moveDown(0.5);
 
         Object.entries(payload.data).forEach(([key, value]) => {
-            doc.font('Helvetica-Bold').text(`${key}: `, { continued: true });
-            doc.font('Helvetica').text(JSON.stringify(value));
+            doc.font(fontBoldPath).text(`${key}: `, { continued: true });
+            doc.font(fontPath).text(typeof value === 'object' ? JSON.stringify(value) : String(value));
         });
 
         doc.end();
