@@ -2,12 +2,12 @@ import IORedis from 'ioredis';
 import { Queue, QueueOptions } from 'bullmq';
 import { JobType } from '../../../domain/job/value-objects/job-type.vo';
 
-export const redisConnection = new IORedis({
-    host: process.env.REDIS_HOST || 'localhost',
-    port: Number(process.env.REDIS_PORT) || 6379,
-    password: process.env.REDIS_PASSWORD,
-    maxRetriesPerRequest: null,
-});
+export const redisConnection = new IORedis(
+    process.env.REDIS_URL || 'redis://localhost:6379',
+    {
+        maxRetriesPerRequest: null,
+    }
+);
 
 const defaultQueueOptions: QueueOptions = {
     connection: redisConnection,
