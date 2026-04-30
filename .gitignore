@@ -42,7 +42,7 @@ docker-compose.override.yml
 
 # Drizzle (migrations cache nếu có)
 drizzle/*.sqlite
-drizzle/meta/
+# drizzle/meta/
 
 # Temporary files
 tmp/
