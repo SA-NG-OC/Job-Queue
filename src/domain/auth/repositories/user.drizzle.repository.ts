@@ -46,8 +46,13 @@ export const userDrizzleRepository: UserRepository = {
     },
 
     exists: async (email) => {
-        const row = await db.query.users.findFirst({ where: eq(users.email, email) });
-        return !!row;
+        // Dùng SELECT 1 thay vì fetch full row
+        const row = await db
+            .select({ id: users.id })
+            .from(users)
+            .where(eq(users.email, email))
+            .limit(1);
+        return row.length > 0;
     },
 
 }

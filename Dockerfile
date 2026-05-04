@@ -46,4 +46,4 @@ USER node
 EXPOSE 3000
 
 # Chạy ứng dụng
-CMD ["sh", "-c", "node dist/app.js"]
+CMD ["sh", "-c", "npm run db:generate && npm run db:migrate && node dist/app.js"]

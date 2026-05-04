@@ -129,6 +129,10 @@ async function handleLogin() {
 
         showApp();
         showToast('Đăng nhập thành công!', 'success');
+
+        // Reset về tab Jobs và load data SAU khi màn hình đã hiện
+        const firstTabBtn = document.querySelector('.nav-item');
+        if (firstTabBtn) switchTab('jobs', firstTabBtn);
     } catch (e) {
         showFormError('login-error', e.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
     }
@@ -194,7 +198,7 @@ function showFormError(id, msg) {
 function showApp() {
     document.getElementById('auth-overlay').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
-    fetchJobs();
+    //fetchJobs();
 }
 
 /* ============================
@@ -679,7 +683,8 @@ async function fetchAuditLogs() {
             page: state.audit.page,
             limit: state.audit.limit,
         });
-        state.audit.data = data?.logs || data?.data || data || [];
+        // data.data thay vì data.logs
+        state.audit.data = data?.data || data?.logs || [];
         state.audit.total = data?.total || state.audit.data.length;
         renderAuditTable();
     } catch (e) { showTableError('audit-tbody', 5, e.message); }
@@ -1103,7 +1108,6 @@ window.handleLogin = async function () {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
 
-    // Demo mode fallback
     if (email === 'demo@example.com' && password === 'demo1234') {
         state.token = 'demo-token-local';
         localStorage.setItem('access_token', 'demo-token-local');
@@ -1112,12 +1116,14 @@ window.handleLogin = async function () {
         document.getElementById('user-role-display').textContent = 'ADMIN';
         document.getElementById('user-avatar').textContent = 'D';
         showApp();
+        // Reset về Jobs tab
+        const jobsBtn = document.querySelector('.nav-item[onclick*="jobs"]');
+        if (jobsBtn) switchTab('jobs', jobsBtn);
         showToast('Đăng nhập demo thành công!', 'success');
         return;
     }
     await _origHandleLogin();
 };
-
 window.handleRegister = async function () {
     const email = document.getElementById('reg-email').value.trim();
     const password = document.getElementById('reg-password').value;
