@@ -29,26 +29,37 @@ export const buildNewWebhook = (
     events: string[],
     userId: string
 ): Result<WebhookEntity> => {
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+
+    const normalizedUrl = url.trim();
+
+    if (
+        !normalizedUrl.startsWith('http://') &&
+        !normalizedUrl.startsWith('https://')
+    ) {
         return err('URL webhook phải bắt đầu bằng http:// hoặc https://');
     }
 
-    const validEvents = events.filter((e): e is WebhookEvent =>
-        WEBHOOK_EVENTS.includes(e as WebhookEvent)
+    const validEvents = events.filter(
+        (e): e is WebhookEvent =>
+            WEBHOOK_EVENTS.includes(e as WebhookEvent)
     );
 
     if (validEvents.length === 0) {
-        return err(`Cần ít nhất 1 event hợp lệ. Các event hợp lệ: ${WEBHOOK_EVENTS.join(', ')}`);
+        return err(
+            `Cần ít nhất 1 event hợp lệ. Các event hợp lệ: ${WEBHOOK_EVENTS.join(', ')}`
+        );
     }
 
-    return ok(createWebhookEntity(id, {
-        url: url.trim(),
-        events: validEvents,
-        isActive: true,
-        userId,
-        createdAt: new Date(),
-    }))
-}
+    return ok(
+        createWebhookEntity(id, {
+            url: normalizedUrl,
+            events: validEvents,
+            isActive: true,
+            userId,
+            createdAt: new Date(),
+        })
+    );
+};
 
 export const webhookToJSON = (w: WebhookEntity) => ({
     id: w.id,

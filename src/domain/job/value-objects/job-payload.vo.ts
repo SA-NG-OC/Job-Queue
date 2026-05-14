@@ -5,12 +5,12 @@ export type SendEmailPayload = {
     to: string;
     subject: string;
     body: string;
-}
+};
 
 export type SendSmsPayload = {
     to: string;
     message: string;
-}
+};
 
 export type ResizeImagePayload = {
     imageUrl: string;
@@ -55,57 +55,127 @@ type PayloadValidatorMap = {
     [K in JobType]: (payload: unknown) => Result<JobPayload>;
 };
 
-const validateSendEmail = (p: unknown): Result<SendEmailPayload> => {
+const validateSendEmail = (
+    p: unknown
+): Result<SendEmailPayload> => {
     const payload = p as SendEmailPayload;
-    if (!payload?.to) return err('Thiếu trường to');
-    if (!payload?.subject) return err('Thiếu trường subject');
-    if (!payload?.body) return err('Thiếu trường body');
+
+    if (!payload?.to)
+        return err('Thiếu trường to');
+
+    if (!payload?.subject)
+        return err('Thiếu trường subject');
+
+    if (!payload?.body)
+        return err('Thiếu trường body');
+
     return ok(payload);
 };
 
-const validateSendSms = (p: unknown): Result<SendSmsPayload> => {
+const validateSendSms = (
+    p: unknown
+): Result<SendSmsPayload> => {
     const payload = p as SendSmsPayload;
-    if (!payload?.to) return err('Thiếu trường to');
-    if (!payload?.message) return err('Thiếu trường message');
+
+    if (!payload?.to)
+        return err('Thiếu trường to');
+
+    if (!payload?.message)
+        return err('Thiếu trường message');
+
     return ok(payload);
 };
 
-const validateResizeImage = (p: unknown): Result<ResizeImagePayload> => {
+const validateResizeImage = (
+    p: unknown
+): Result<ResizeImagePayload> => {
     const payload = p as ResizeImagePayload;
-    if (!payload?.imageUrl) return err('Thiếu trường imageUrl');
-    if (!payload?.width) return err('Thiếu trường width');
-    if (!payload?.height) return err('Thiếu trường height');
-    if (payload.width <= 0) return err('width phải lớn hơn 0');
-    if (payload.height <= 0) return err('height phải lớn hơn 0');
+
+    if (!payload?.imageUrl)
+        return err('Thiếu trường imageUrl');
+
+    if (payload?.width === undefined)
+        return err('Thiếu trường width');
+
+    if (payload?.height === undefined)
+        return err('Thiếu trường height');
+
+    if (payload.width <= 0)
+        return err('width phải lớn hơn 0');
+
+    if (payload.height <= 0)
+        return err('height phải lớn hơn 0');
+
     return ok(payload);
 };
 
-const validateCompressVideo = (p: unknown): Result<CompressVideoPayload> => {
+const validateCompressVideo = (
+    p: unknown
+): Result<CompressVideoPayload> => {
     const payload = p as CompressVideoPayload;
-    if (!payload?.videoUrl) return err('Thiếu trường videoUrl');
-    if (payload?.quality < 1 || payload?.quality > 100) return err('quality phải từ 1-100');
+
+    if (!payload?.videoUrl)
+        return err('Thiếu trường videoUrl');
+
+    if (payload?.quality === undefined)
+        return err('Thiếu trường quality');
+
+    if (payload.quality < 1 || payload.quality > 100)
+        return err('quality phải từ 1-100');
+
     return ok(payload);
 };
 
-const validateGeneratePdf = (p: unknown): Result<GeneratePdfPayload> => {
+const validateGeneratePdf = (
+    p: unknown
+): Result<GeneratePdfPayload> => {
     const payload = p as GeneratePdfPayload;
-    if (!payload?.templateId) return err('Thiếu trường templateId');
-    if (!payload?.data) return err('Thiếu trường data');
+
+    if (!payload?.templateId)
+        return err('Thiếu trường templateId');
+
+    if (!payload?.data)
+        return err('Thiếu trường data');
+
     return ok(payload);
 };
 
-const validateExportCsv = (p: unknown): Result<ExportCsvPayload> => {
+const validateExportCsv = (
+    p: unknown
+): Result<ExportCsvPayload> => {
     const payload = p as ExportCsvPayload;
-    if (!payload?.data) return err('Thiếu trường data');
-    if (!payload?.filename) return err('Thiếu trường filename');
+
+    if (!payload?.filename)
+        return err('Thiếu trường filename');
+
+    if (!payload?.data)
+        return err('Thiếu trường data');
+
     return ok(payload);
 };
 
-const validateCallWebhook = (p: unknown): Result<CallWebhookPayload> => {
+const validateCallWebhook = (
+    p: unknown
+): Result<CallWebhookPayload> => {
     const payload = p as CallWebhookPayload;
-    const validMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
-    if (!payload?.url) return err('Thiếu trường url');
-    if (!validMethods.includes(payload?.method)) return err('method không hợp lệ');
+
+    const validMethods: CallWebhookPayload['method'][] = [
+        'GET',
+        'POST',
+        'PUT',
+        'PATCH',
+        'DELETE',
+    ];
+
+    if (!payload?.url)
+        return err('Thiếu trường url');
+
+    if (!payload?.method)
+        return err('Thiếu trường method');
+
+    if (!validMethods.includes(payload.method))
+        return err('method không hợp lệ');
+
     return ok(payload);
 };
 
@@ -122,4 +192,6 @@ const payloadValidators: PayloadValidatorMap = {
 export const validateJobPayload = (
     type: JobType,
     payload: unknown
-): Result<JobPayload> => payloadValidators[type](payload);
+): Result<JobPayload> => {
+    return payloadValidators[type](payload);
+};
