@@ -1,8 +1,8 @@
 import { CronJob } from 'cron';
 import parser from 'cron-parser';
 import { markScheduleRan } from '../../../domain/schedule/entities/schedule.entity';
-import { scheduleDrizzleRepository } from '../../../domain/schedule/repositories/schedule.drizzle.repository';
-import { jobDrizzleRepository } from '../../../domain/job/repositories/job.drizzle.repository';
+import { scheduleDrizzleRepository } from '../../drizzle/schedule.drizzle.repository';
+import { jobDrizzleRepository } from '../../drizzle/job.drizzle.repository';
 import { makeCreateJobUseCase } from '../../../application/job/create-job.use-case';
 
 const createJob = makeCreateJobUseCase(jobDrizzleRepository);

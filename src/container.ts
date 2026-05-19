@@ -1,4 +1,4 @@
-import { userDrizzleRepository } from './domain/auth/repositories/user.drizzle.repository';
+import { userDrizzleRepository } from './infrastructure/drizzle/user.drizzle.repository';
 import { makeRegisterUseCase } from './application/auth/register.use-case';
 import { makeLoginUseCase } from './application/auth/login.use-case';
 import { makeRefreshTokenUseCase } from './application/auth/refresh-token.use-case';
@@ -6,8 +6,8 @@ import { makeCreateJobUseCase } from './application/job/create-job.use-case';
 import { makeGetJobByIdUseCase, makeGetJobsUseCase } from './application/job/get-jobs.use-case';
 import { makeCancelJobUseCase } from './application/job/cancel-job.use-case';
 import { makeRetryJobUseCase } from './application/job/retry-job.use-case';
-import { jobDrizzleRepository } from './domain/job/repositories/job.drizzle.repository';
-import { scheduleDrizzleRepository } from './domain/schedule/repositories/schedule.drizzle.repository';
+import { jobDrizzleRepository } from './infrastructure/drizzle/job.drizzle.repository';
+import { scheduleDrizzleRepository } from './infrastructure/drizzle/schedule.drizzle.repository';
 import { makeCreateScheduleUseCase } from './application/schedule/create-schedule.use-case';
 import { makeUpdateScheduleUseCase } from './application/schedule/update-schedule.use-case';
 import { makeToggleScheduleUseCase } from './application/schedule/toggle-schedule.use-case';
@@ -16,8 +16,8 @@ import { makeRegisterWebhookUseCase } from './application/webhook/register-webho
 import { makeDeleteWebhookUseCase } from './application/webhook/delete-webhook.use-case';
 import { makeDispatchWebhookUseCase } from './application/webhook/dispatch-webhook.use-case';
 import { makeGetAuditLogsUseCase, makeLogAuditUseCase } from './application/audit/log-audit.use-case';
-import { webhookDrizzleRepository } from './domain/webhook/repositories/webhook.drizzle.repository';
-import { auditDrizzleRepository } from './domain/audit/repositories/audit.drizzle.repository';
+import { webhookDrizzleRepository } from './infrastructure/drizzle/webhook.drizzle.repository';
+import { auditDrizzleRepository } from './infrastructure/drizzle/audit.drizzle.repository';
 import { makeGetSchedulesUseCase } from './application/schedule/get-schedules.usecase';
 
 // Wire repositories

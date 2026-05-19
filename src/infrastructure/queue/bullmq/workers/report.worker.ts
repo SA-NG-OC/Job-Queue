@@ -3,7 +3,7 @@ import { redisConnection } from '../client';
 import { processGeneratePdfJob, processExportCsvJob } from '../../processors/report.processor';
 import { JobType } from '../../../../domain/job/value-objects/job-type.vo';
 import { markJobStarted, markJobCompleted, markJobFailed } from '../../../../domain/job/entities/job.entity';
-import { jobDrizzleRepository } from '../../../../domain/job/repositories/job.drizzle.repository';
+import { jobDrizzleRepository } from '../../../drizzle/job.drizzle.repository';
 import { emitWebhook } from '../../../events/webhook.listener';
 
 export const reportWorker = new Worker(

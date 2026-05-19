@@ -1,9 +1,9 @@
 import { and, count, eq, gte } from "drizzle-orm";
-import { auditLogs } from "../../../db/schema";
-import { AuditAction, AuditLogEntity, createAuditLog } from "../entities/audit-log.entity";
-import { AuditFilter, AuditRepository } from "./audit.repository";
+import { auditLogs } from "../../db/schema";
+import { AuditAction, AuditLogEntity, createAuditLog } from "../../domain/audit/entities/audit-log.entity";
+import { AuditFilter, AuditRepository } from "../../domain/audit/repositories/audit.repository";
 import { lte } from "drizzle-orm";
-import { db } from "../../../db";
+import { db } from "../../db";
 
 const toEntity = (row: typeof auditLogs.$inferSelect): AuditLogEntity =>
     createAuditLog(

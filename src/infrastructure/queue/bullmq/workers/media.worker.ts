@@ -1,5 +1,5 @@
 import { Worker, Job } from 'bullmq'
-import { jobDrizzleRepository } from '../../../../domain/job/repositories/job.drizzle.repository';
+import { jobDrizzleRepository } from '../../../drizzle/job.drizzle.repository';
 import { markJobCompleted, markJobFailed, markJobStarted } from '../../../../domain/job/entities/job.entity';
 import { redisConnection } from '../client';
 import { processCompressVideoJob, processResizeImageJob } from '../../processors/media.processor';

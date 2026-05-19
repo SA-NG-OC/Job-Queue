@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
-import { db } from "../../../db";
-import { webhooks } from "../../../db/schema";
-import { createWebhookEntity, WebhookEntity, WebhookEvent } from "../entities/webhook.entity";
-import { WebhookRepository } from "./webhook.repository";
+import { db } from "../../db";
+import { webhooks } from "../../db/schema";
+import { createWebhookEntity, WebhookEntity, WebhookEvent } from "../../domain/webhook/entities/webhook.entity";
+import { WebhookRepository } from "../../domain/webhook/repositories/webhook.repository";
 
 const toEntity = (row: typeof webhooks.$inferSelect): WebhookEntity => createWebhookEntity(row.id, {
     url: row.url,

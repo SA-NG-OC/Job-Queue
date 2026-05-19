@@ -2,7 +2,7 @@ import { Worker, Job } from 'bullmq';
 import { redisConnection } from '../client';
 import { processWebhookJob } from '../../processors/webhook.processor';
 import { markJobStarted, markJobCompleted, markJobFailed } from '../../../../domain/job/entities/job.entity';
-import { jobDrizzleRepository } from '../../../../domain/job/repositories/job.drizzle.repository';
+import { jobDrizzleRepository } from '../../../drizzle/job.drizzle.repository';
 import { emitWebhook } from '../../../events/webhook.listener';
 
 export const webhookWorker = new Worker(

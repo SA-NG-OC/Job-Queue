@@ -1,11 +1,11 @@
 import { and, count, eq, desc } from "drizzle-orm";
-import { db } from "../../../db";
-import { jobs } from "../../../db/schema";
-import { createJobEntity, JobEntity } from "../entities/job.entity";
-import { JobPayload } from "../value-objects/job-payload.vo";
-import { JobStatus } from "../value-objects/job-status.vo";
-import { JobType } from "../value-objects/job-type.vo";
-import { JobFilter, JobRepository } from "./job.repository";
+import { db } from "../../db";
+import { jobs } from "../../db/schema";
+import { createJobEntity, JobEntity } from "../../domain/job/entities/job.entity";
+import { JobPayload } from "../../domain/job/value-objects/job-payload.vo";
+import { JobStatus } from "../../domain/job/value-objects/job-status.vo";
+import { JobType } from "../../domain/job/value-objects/job-type.vo";
+import { JobFilter, JobRepository } from "../../domain/job/repositories/job.repository";
 
 const toEntity = (row: typeof jobs.$inferSelect): JobEntity =>
     createJobEntity(row.id, {
